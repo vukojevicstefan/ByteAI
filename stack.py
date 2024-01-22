@@ -84,10 +84,12 @@ class Stack:
         else:
             print("Invalid position. Cannot get a figure.")
             return None
+        
     def clear(self):
         self.first=None
         self.last=None
         self.size=0
+
     def update_stack(self):
         current_node = self.first
         position = 0
@@ -100,4 +102,3 @@ class Stack:
             position += 1
             self.size += 1
         self.last=prev
-    
