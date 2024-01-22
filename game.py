@@ -17,7 +17,7 @@ def find_fastest_paths(state, start_position):
     
     visited = [[False] * size for _ in range(size)]
     queue = SimpleQueue()
-    queue.put((start_row, start_col, 0, []))  
+    queue.put((start_row, start_col, 0, []))
     visited[start_row - 1][start_col - 1] = True  
 
     shortest_paths = []
@@ -111,7 +111,7 @@ def oceni(stanje, boja):
             if stack_at_ij.last is not None:
                 last_figure = stack_at_ij.last.figure
                 if stack_at_ij.size == 7:
-                    opposite_color = 'White' if boja == 'Black' else 'Black'
+                    # opposite_color = 'White' if boja == 'Black' else 'Black'
                     valid_positions = [
                         (i - 1, j - 1),  # upper left
                         (i - 1, j + 1),  # upper right
@@ -199,6 +199,7 @@ class Chessboard(tk.Tk):
         canvas_size = board_size - 50 
 
         self.state('zoomed')
+        self.resizable(False,False)
         self.points=0
         self.size = size
         self.nbStacksOut=0
@@ -277,7 +278,7 @@ class Chessboard(tk.Tk):
             for j in range(self.size):
                 color = "grey" if (i + j) % 2 == 0 else "white"
                 square_id = self.canvas.create_rectangle(
-                    j * square_size, i * square_size, (j + 1) * square_size, (i + 1) * square_size, fill=color,
+                    j * square_size + 200, i * square_size, (j + 1) * square_size + 200, (i + 1) * square_size, fill=color,
                     tags="square"
                 )
 
@@ -327,10 +328,12 @@ class Chessboard(tk.Tk):
         if figures and (self.current_player == 'human' and self.human_color==self.current_player_color and figures[position_in_stack].color == self.current_player_color):
             self.selected_position = position
             self.selected_stack_position = position_in_stack
+
             self.current_position_entry.config(state='normal')
             self.current_position_entry.delete(0, tk.END)
             self.current_position_entry.insert(0, f"{row},{col}")
             self.current_position_entry.config(state='readonly')
+
             self.new_position_entry.delete(0, tk.END)
 
             self.new_height_entry.config(state='normal')
@@ -366,7 +369,6 @@ class Chessboard(tk.Tk):
         else:
             try:
                 dest_row, dest_col = map(int, new_position_str.split(","))
-                print("Point 1")
                 self.save_new_position((dest_row, dest_col))
             except ValueError:
                 print(
@@ -395,16 +397,19 @@ class Chessboard(tk.Tk):
 
             stack_at_destination.update_stack()
             stack_at_current.update_stack()
+
             nodeTmp=stack_at_current.first
             print("Previous stack:", " size ", stack_at_current.size)
             while nodeTmp:
                 print(nodeTmp.position_in_stack,nodeTmp.figure.color)
                 nodeTmp=nodeTmp.next
             nodeTmp=stack_at_destination.first
+
             print("Current stack:", " size ", stack_at_destination.size)
             while nodeTmp:
                 print(nodeTmp.position_in_stack,nodeTmp.figure.color)
                 nodeTmp=nodeTmp.next
+
             if(stack_at_destination.size==8):
                 self.end_game(stack_at_destination)
             self.toggle_player()
@@ -423,14 +428,15 @@ class Chessboard(tk.Tk):
         stack.first=None
         stack.update_stack()
         self.draw_all_figures()
+
         minus_one_for_14=0
         if(self.size==14):
             minus_one_for_14=1
-        if self.points>=math.floor(self.size/2*(self.size-2)/16+1)-minus_one_for_14:
+        if self.points >= math.floor(self.size/2*(self.size-2)/16+1) - minus_one_for_14:
             self.print_winner('White')
-        if self.points<=-(math.floor(self.size/2*(self.size-2)/16+1))+minus_one_for_14:
+        if self.points <= -(math.floor(self.size/2*(self.size-2)/16+1)) + minus_one_for_14:
             self.print_winner('Black')
-        if self.nbStacksOut==math.floor(self.size/2*(self.size-2)/8)-minus_one_for_14:
+        if self.nbStacksOut == math.floor(self.size/2*(self.size-2)/8) - minus_one_for_14:
             if(self.points>0):
                 self.print_winner('White')
             if(self.points<0):
@@ -441,7 +447,6 @@ class Chessboard(tk.Tk):
             messagebox.showinfo("Game Over", "White won!")
         elif winner == 'Black':
             messagebox.showinfo("Game Over", "Black won!")
-
         self.destroy()
 
     def draw_all_figures(self):
@@ -452,8 +457,9 @@ class Chessboard(tk.Tk):
                 figures = stack_at_ij.get_all_figures()
                 if figures:
                     for position_in_stack, figure in enumerate(figures):
-                        x = (j + 0.5)*(self.canvas.winfo_reqheight() // self.size)
+                        x = (j + 0.5)*(self.canvas.winfo_reqheight() // self.size) + 200
                         y = (i + 0.5)*(self.canvas.winfo_reqheight() // self.size)- position_in_stack * 10
+
                         figure_image = self.black_image if figure.color == 'Black' else self.white_image
                         figure_id = self.canvas.create_image(x, y, image=figure_image, tags="figure")
                         figure.figure_id = figure_id
@@ -464,22 +470,15 @@ class Chessboard(tk.Tk):
                             lambda event, pos=(i + 1, j + 1), pos_in_stack=position_in_stack: self.on_figure_click(pos, pos_in_stack))
 
     def create_controls(self):
-        for i in range(1, self.size + 1):
-            for j in range(1, self.size + 1):
-                self.canvas.create_rectangle(
-                    (j - 1) * (self.canvas.winfo_reqwidth() // self.size),
-                    (i - 1) * (self.canvas.winfo_reqheight() // self.size),
-                    j * (self.canvas.winfo_reqwidth() // self.size),
-                    i * (self.canvas.winfo_reqheight() // self.size),
-                    outline="black", tags="square"
-                )
         restart_button = tk.Button(self, text="Restart Game", command=self.restart_game, width=2,height=2)
         restart_button.grid(row=8, column=1, sticky="nsew")
         
     def restart_game(self):
         self.stacks = [[Stack() for _ in range(self.size)] for _ in range(self.size)]
+        
         self.current_player = self.first_player
         self.current_player_color='White'
+
         self.move_label.config(text=f"White to move")
         self.game_started = False
         self.points = 0
