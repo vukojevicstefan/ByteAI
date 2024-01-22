@@ -83,7 +83,9 @@ def available_moves(state, color):
                             if(valid_position[0]<=-1 or valid_position[0]>=size or valid_position[1]<=-1 or valid_position[1]>=size):
                                 valid_positions.remove(valid_position)
                         flag=True
-                        
+                        for valid_position in valid_positions:
+                            if state[valid_position[0]][valid_position[1]].size!=0:
+                                flag=False
                         if flag:
                             paths = find_fastest_paths(state, (current_position[0], current_position[1]))
                             for valid_position in valid_positions:
@@ -94,10 +96,8 @@ def available_moves(state, color):
                                             available_moves.append((current_position,valid_position))
                         else:
                             for valid_position in valid_positions:
-                                if(valid_position[0]!=size and valid_position[1]!=size):
-                                    if(state[valid_position[0]][valid_position[1]].size!=0):
-                                        if is_valid_move(state, current_position, valid_position, True):
-                                            available_moves.append((current_position, valid_position))
+                                if is_valid_move(state, current_position, valid_position, True):
+                                    available_moves.append((current_position, valid_position))
     
     return available_moves
 
@@ -194,7 +194,8 @@ class Chessboard(tk.Tk):
         super().__init__()
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
-        board_size = min(screen_width, screen_height) - 100 
+
+        board_size = min(screen_width, screen_height) - 140 
         canvas_size = board_size - 50 
 
         self.state('zoomed')
